@@ -25,7 +25,7 @@ class ArticleAdmin(admin.ModelAdmin):
     """Article on admin panel"""
     list_display = ('id', 'get_short_title', 'created_at', 'site_board')
     list_display_links = ('get_short_title',)
-    list_filter = ('site_board', 'created_at')
+    list_filter = ('site_board', 'created_at',)
     readonly_fields = ('created_at', 'id')
 
     def get_short_title(self, obj):
