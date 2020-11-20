@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 import requests
+import json
 import os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
 import django
@@ -8,77 +9,49 @@ django.setup()
 from news.models import Article, SiteBoard
 
 
-def get_techcrunch_articles():
-    site_board_name = SiteBoard.objects.get(site_name='TechCrunch')
+headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0'}
+
+
+def get_articles(site):
+    """Universal parser for multiple sites"""
+    site_board_name = SiteBoard.objects.get(site_name=site['site_name'])
     Article.objects.filter(site_board=site_board_name).delete()
-    response = requests.get('https://techcrunch.com/')
-    data = response.text
-    soup = BeautifulSoup(data, features='html.parser')
-    for post in soup.find_all(class_='post-block--unread')[:10]:
+    response = requests.get(site['site_board_url'], headers=headers)
+    soup = BeautifulSoup(response.text, features='html.parser')
+    for post in soup.find_all(class_=site['card_class'])[:10]:
         article = Article(
-            title=post.find('a', class_='post-block__title__link').get_text().strip(),
-            description=post.find('div', class_='post-block__content').get_text().strip(),
-            url=post.find('a', class_='post-block__title__link').get('href'),
+            title=post.find(site['title_tag'], class_=site['title_class']).get_text().strip(),
+            description=post.find(site['descr_tag'], class_=site['descr_class']).get_text().strip() if site['descr_tag'] else 'Read more in this article',
+            url=post.find(site['url_tag'], class_=site['url_class']).get('href'),
             site_board=site_board_name
         )
         article.save()
 
 
-get_techcrunch_articles()
+# You're the chosen one, ha?
+def get_wired_articles():
+    """Parser for Wired"""
+    site_board_name = SiteBoard.objects.get(site_name='Wired')
+    Article.objects.filter(site_board=site_board_name).delete()
+    response = requests.get('https://www.wired.com/', headers=headers)
+    soup = BeautifulSoup(response.text, features='html.parser')
+    for post in soup.find_all(class_='card-component__description')[:10]:
+        article = Article(
+            title=post.find('h2').get_text().strip(),
+            description=post.find('span').get_text().strip(),
+            url=post.find('a').get('href') if 'http' in post.find('a').get('href') else 'https://www.wired.com' + post.find('a').get('href'),
+            site_board=site_board_name
+        )
+        article.save()
 
 
-# bs4 a lot faster than selenium.
+def start_parsing():
+    """Read json data and start parsing"""
+    get_wired_articles()
+    with open("data.json", "r") as read_file:
+        search_data = json.load(read_file)
+    for site in search_data:
+        get_articles(search_data[site])
 
-# from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
-# from selenium.webdriver.common.by import By
-# from selenium.webdriver.support.ui import WebDriverWait
-# from selenium.webdriver.support import expected_conditions as EC
-# from selenium import webdriver
-# from selenium.webdriver.chrome.options import Options
-# # import time
-#
-#
-# def chrome_options():
-#     options = Options()
-#     options.add_argument("--headless")  # No open browser
-#     options.add_argument("--window-size=1920x1080")
-#     return options
-#
-#
-# browser = webdriver.Chrome(options=chrome_options())
-#
-#
-# def get_element_text(how, name):
-#     WebDriverWait(browser, 5).until(
-#         EC.presence_of_element_located((how, name)))
-#     try:
-#         return str(browser.find_element(how, name).text)
-#     except NoSuchElementException:
-#         return None
-#
-#
-# def get_techcrunch_article():
-#     link = 'https://techcrunch.com/'
-#     browser.get(link)
-#     attempts = 0
-#     while attempts < 2:
-#         try:
-#             art = []
-#             # browser.implicitly_wait(5)
-#             articles = browser.find_elements_by_css_selector("article.post-block")[:10]
-#             for article in articles:
-#                 article.click()
-#                 art.append(get_element_text(By.CLASS_NAME, "article__title"))
-#                 art.append(get_element_text(By.ID, "speakable-summary"))
-#                 art.append(browser.current_url)
-#             for i in art:
-#                 print(i)
-#             break
-#         except StaleElementReferenceException:
-#             print("StaleElementReferenceException let's try 1-2 times")
-#             attempts += 1
-#         finally:
-#             browser.quit()
-#
-#
-# get_techcrunch_article()
+
+start_parsing()
