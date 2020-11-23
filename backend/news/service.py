@@ -1,15 +1,29 @@
 from bs4 import BeautifulSoup
+import traceback
 import requests
 import json
 import os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
 import django
 django.setup()
+from django.core.mail import send_mail
+from django.contrib.auth.models import User
 
+from backend.settings import EMAIL_HOST_USER
 from news.models import Article, SiteBoard
 
 
 headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0'}
+
+
+def send_message_about_problems(err_title, err_body):
+    send_mail(
+        err_title,
+        err_body,
+        EMAIL_HOST_USER,
+        [User.objects.get(is_superuser=True).email],
+        fail_silently=False,
+    )
 
 
 def get_articles(site):
@@ -47,11 +61,16 @@ def get_wired_articles():
 
 def start_parsing():
     """Read json data and start parsing"""
-    get_wired_articles()
-    with open("data.json", "r") as read_file:
+    with open("news/data.json", "r") as read_file:
         search_data = json.load(read_file)
-    for site in search_data:
-        get_articles(search_data[site])
-
-
-start_parsing()
+    try:
+        get_wired_articles()
+        for site in search_data:
+            get_articles(search_data[site])
+    except Exception as ex:
+        err_title = f'Wake up, Neo... We are fucked up! Content aggregator problem!'
+        err_body = f'Possible problem with {search_data[site]["site_name"]} in data.json.\n ' \
+                   f'{ex.__class__.__name__ }, {ex}.\n\n ' \
+                   f'{traceback.format_exc()}'
+        print(traceback.format_exc())
+        send_message_about_problems(err_title, err_body)

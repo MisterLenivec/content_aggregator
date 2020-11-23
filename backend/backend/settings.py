@@ -128,3 +128,29 @@ STATIC_URL = '/static/'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+    "http://192.168.1.67:8080",
+
+]
+
+EMAIL_BACKEND = os.environ.get('my_email_backend')
+EMAIL_HOST = os.environ.get('my_email_host')
+EMAIL_PORT = int(os.environ.get('my_email_port'))
+EMAIL_HOST_USER = os.environ.get('my_email_host_user')
+EMAIL_HOST_PASSWORD = os.environ.get('my_email_host_password')
+EMAIL_USE_TLS = os.environ.get('my_email_use_tls') == 'True'
+EMAIL_USE_SSL = os.environ.get('my_email_use_ssl') == 'True'
+DEFAULT_FROM_EMAIL = os.environ.get('my_email_host_user')
+
+REDIS_HOST = '0.0.0.0'
+REDIS_PORT = '6379'
+CELERY_BROKER_URL = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
+CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
+CELERY_RESULT_BACKEND = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
