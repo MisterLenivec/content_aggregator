@@ -16,10 +16,12 @@ from news.models import Article, SiteBoard
 headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:83.0) Gecko/20100101 Firefox/83.0'}
 
 
-def send_message_about_problems(err_title, err_body):
+def send_message_about_problems(ex, site_name='Wired'):
     send_mail(
-        err_title,
-        err_body,
+        'Wake up, Neo... We are fucked up! Content aggregator problem!',
+        f'Possible problem with {site_name} in data.json.\n '
+        f'{ex.__class__.__name__}, {ex}.\n\n '
+        f'{traceback.format_exc()}',
         EMAIL_HOST_USER,
         [User.objects.get(is_superuser=True).email],
         fail_silently=False,
@@ -61,16 +63,21 @@ def get_wired_articles():
 
 def start_parsing():
     """Read json data and start parsing"""
-    with open("news/data.json", "r") as read_file:
-        search_data = json.load(read_file)
     try:
         get_wired_articles()
-        for site in search_data:
-            get_articles(search_data[site])
-    except Exception as ex:
-        err_title = f'Wake up, Neo... We are fucked up! Content aggregator problem!'
-        err_body = f'Possible problem with {search_data[site]["site_name"]} in data.json.\n ' \
-                   f'{ex.__class__.__name__ }, {ex}.\n\n ' \
-                   f'{traceback.format_exc()}'
+    except AttributeError:
         print(traceback.format_exc())
-        send_message_about_problems(err_title, err_body)
+        send_message_about_problems(AttributeError)
+
+    try:
+        with open("news/data.json", "r") as read_file:
+            search_data = json.load(read_file)
+            for site in search_data:
+                try:
+                    get_articles(search_data[site])
+                except AttributeError:
+                    print(traceback.format_exc())
+                    send_message_about_problems(AttributeError, search_data[site]["site_name"])
+    except FileNotFoundError:
+        print(traceback.format_exc())
+        send_message_about_problems(FileNotFoundError, 'reading data')
