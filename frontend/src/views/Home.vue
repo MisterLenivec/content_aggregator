@@ -1,34 +1,183 @@
 <template>
   <div class="home">
-    <section class="py-3 bg-light mt-1">
-      <p class="m-2">Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-        Accusamus accusantium aliquid asperiores, culpa debitis dolore dolorum est
-        et explicabo fugit id illo incidunt, ipsam ipsum libero magnam maxime modi
-        nulla quisquam reiciendis rem repudiandae sed sit veritatis voluptate.
-        Ab consequuntur cum cupiditate debitis fugit veritatis voluptatem!
-        Animi autem cum doloribus ex fuga fugiat magnam mollitia, necessitatibus quae
-        quas quia quisquam sint ullam vel veritatis vero voluptates?
-        Accusamus ad amet at autem consequatur corporis dignissimos dolor earum enim
-        explicabo facilis in incidunt laboriosam necessitatibus nesciunt, nisi odio
-        officia officiis perferendis placeat porro, quam quas quos reprehenderit
-        rerum sit sunt temporibus ullam voluptate voluptatibus! Accusamus accusantium
-        deserunt, doloribus eos facere, hic magnam natus nulla praesentium quasi
-        saepe ut voluptatum. Aliquam consectetur cumque fuga itaque molestiae nemo
-        praesentium similique soluta tempore voluptates. Animi beatae commodi delectus
-        et eveniet illum iusto modi neque nesciunt optio porro possimus quisquam quo
-        quod, temporibus veniam voluptatibus? Atque distinctio dolorem doloribus fuga id
-        illo impedit iste itaque magnam, maxime necessitatibus nobis numquam, optio
-        praesentium provident quas qui sint unde. Cum cumque fuga rem sed temporibus?
-        Ab aspernatur blanditiis, consequuntur, culpa dolore eveniet fugiat fugit in
-        ipsam ipsum molestias nobis nulla perspiciatis porro qui reprehenderit sapiente
-        sed ullam vero.</p>
-    </section>
+    <h2 class="tech-title text-center">Most popular tech news sites</h2>
+    <div class="home-wrapper">
+      <aside class="home-aside"></aside>
+      <div class="boards-list-wrapper">
+        <div class="boards-container">
+          <div v-for="board in listBoards" :key="board.id"
+               class="card bg-transparent board">
+            <div class="card-header bg-transparent">
+              <h5 class="card-title">{{ board.site_name }}</h5>
+              <p class="line-hidden board-description card-text text-secondary"
+                 :title="board.description">
+                {{ board.description }}
+              </p>
+            </div>
+            <ul class="list-group list-group-flush">
+              <li v-for="article in listArticles"
+                  v-if="article.site_board === board.site_name"
+                  :key="article.id" class="list-group-item bg-transparent article">
+                <a class="article-url" :href="article.url"
+                   :title="article.title + '\n\n' + article.description">
+                  <span class="line-hidden">{{ article.title }}</span>
+                </a>
+              </li>
+            </ul>
+            <div class="card-footer bg-transparent">
+              <a :href="board.url" class="card-link" target="_blank">
+                <span>{{ board.url }}</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="home-sidebar"></div>
+    </div>
   </div>
 </template>
 
 <script>
 export default {
   name: "Home",
-  components: {}
+  data() {
+    return {
+      listArticles: [],
+      listBoards: [],
+    }
+  },
+  components: {},
+  created() {
+    this.loadListArticles()
+    this.loadListBoards()
+  },
+  methods: {
+    async loadListArticles() {
+      this.listArticles = await fetch(
+          `${this.$store.getters.getServerUrl}/article`
+      ).then(response => response.json())
+      console.log(this.listArticles)
+    },
+    async loadListBoards() {
+      this.listBoards = await fetch(
+          `${this.$store.getters.getServerUrl}/board`
+      ).then(response => response.json())
+      console.log(this.listBoards)
+    }
+  }
 };
 </script>
+
+<style scoped>
+.home-wrapper {
+  width: 100%;
+  /*height: 100vh;*/
+  /*display: -ms-grid;*/
+  display: grid;
+  -ms-grid-columns: auto minmax(auto, 1200px) auto;
+  grid-template-columns: auto minmax(auto, 1200px) auto;
+  -ms-grid-rows: 5px auto 5px;
+  grid-template-rows: auto;
+      grid-template-areas:
+      "aside main sidebar";
+  grid-row-gap: 5px;
+}
+.home-aside {
+  -ms-grid-row: 2;
+  -ms-grid-column: 1;
+  grid-area: aside;
+  background-color: #ffffff;
+}
+.boards-list-wrapper {
+  -ms-grid-row: 2;
+  -ms-grid-column: 3;
+  grid-area: main;
+  background-color: #ffffff;
+  /*background-color: #e8e2fb;*/
+}
+.home-sidebar {
+  -ms-grid-row: 2;
+  -ms-grid-column: 5;
+  grid-area: sidebar;
+  background-color: #ffffff;
+}
+.boards-list-wrapper {
+  /*display: -ms-grid;*/
+  display: grid;
+  grid-template-columns: 1fr repeat(12, minmax(auto, 100px)) 1fr;
+  padding: 15px 0;
+}
+.boards-container {
+  -ms-grid-column: 2;
+  -ms-grid-column-span: 12;
+  grid-column: 2 / span 12;
+  /*display: -ms-grid;*/
+  display: grid;
+  grid-template-columns: repeat(12, minmax(auto, 95px));
+  grid-gap: 6px;
+}
+.board {
+  -ms-grid-column-span: 4;
+  grid-column-end: span 4;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  border-radius: .3rem;
+}
+.tech-title {
+  font-weight: bold;
+  padding: 5px;
+  margin: 0;
+  background: #e8e2fb;
+}
+.board-description {
+  height: 48px;
+}
+.article {
+  height: 73px;
+}
+.card, .list-group-item, .card-header {
+  border-color: #ffddba;
+}
+.card-title {
+  color: #d1925d;
+  cursor: default;
+}
+.card-link {
+  color: #d1925d;
+}
+.card-link:hover, .article-url:hover {
+  color: #5f9ea0;
+}
+.article-url {
+  text-decoration: none;
+  color: #212529;
+}
+.line-hidden {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow-y: hidden;
+  text-overflow: ellipsis;
+}
+
+@media all and (max-width: 1200px) {
+  .board {
+    -ms-grid-column-span: 6;
+    grid-column-end: span 6;
+  }
+}
+@media all and (max-width: 850px) {
+  .board {
+    -ms-grid-column-span: 12;
+    grid-column-end: span 12;
+  }
+  .article {
+    height: 63px;
+    padding: .25rem 1.25rem;;
+  }
+  .tech-title {
+    font-size: 22px;
+  }
+}
+</style>

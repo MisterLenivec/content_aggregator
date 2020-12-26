@@ -1,3 +1,24 @@
 body {
-    background: #42b983;
+  font-size: 16px;
+  font-family: 'Open Sans', sans-serif;
+  color: #212529;
+  background: #ffffff;
 }
+/*333333*/
+a {
+  text-decoration: none;
+  color: #212529;
+}
+.head-foot-back {
+  background: #d1925d;
+  font-size: 18px;
+}
+.no-gutters {
+  padding-right:0;
+  padding-left:0;
+}
+/*footer at bottom of page -------------------------*/
+.router-wrapper {
+  min-height: calc(100vh - 143px);
+}
+/*--------------------------------------------------*/
