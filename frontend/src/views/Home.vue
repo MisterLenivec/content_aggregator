@@ -18,9 +18,15 @@
               <li v-for="article in listArticles"
                   v-if="article.site_board === board.site_name"
                   :key="article.id" class="list-group-item bg-transparent article">
-                <a class="article-url" :href="article.url"
+                <a class="article-url" :href="article.url" target="_blank"
                    :title="article.title + '\n\n' + article.description">
-                  <span class="line-hidden">{{ article.title }}</span>
+                  <div class="img-container">
+                    <img class="img-fluid article-img"
+                         :src="article.image_url || board.image_url" alt="">
+                  </div>
+                  <span class="line-hidden article-title">
+                    {{ article.title }}
+                  </span>
                 </a>
               </li>
             </ul>
@@ -71,8 +77,7 @@ export default {
 <style scoped>
 .home-wrapper {
   width: 100%;
-  /*height: 100vh;*/
-  /*display: -ms-grid;*/
+  display: -ms-grid;
   display: grid;
   -ms-grid-columns: auto minmax(auto, 1200px) auto;
   grid-template-columns: auto minmax(auto, 1200px) auto;
@@ -102,7 +107,7 @@ export default {
   background-color: #ffffff;
 }
 .boards-list-wrapper {
-  /*display: -ms-grid;*/
+  display: -ms-grid;
   display: grid;
   grid-template-columns: 1fr repeat(12, minmax(auto, 100px)) 1fr;
   padding: 15px 0;
@@ -111,7 +116,7 @@ export default {
   -ms-grid-column: 2;
   -ms-grid-column-span: 12;
   grid-column: 2 / span 12;
-  /*display: -ms-grid;*/
+  display: -ms-grid;
   display: grid;
   grid-template-columns: repeat(12, minmax(auto, 95px));
   grid-gap: 6px;
@@ -133,9 +138,6 @@ export default {
 .board-description {
   height: 48px;
 }
-.article {
-  height: 73px;
-}
 .card, .list-group-item, .card-header {
   border-color: #ffddba;
 }
@@ -149,9 +151,23 @@ export default {
 .card-link:hover, .article-url:hover {
   color: #5f9ea0;
 }
+.article {
+  height: 309px;
+  text-align: center;
+}
+.article-title {
+  padding-top: 7px;
+}
+.img-container {
+  height: 236px;
+}
+.article-img {
+  max-height: 236px;
+}
 .article-url {
   text-decoration: none;
   color: #212529;
+  text-align: center;
 }
 .line-hidden {
   display: -webkit-box;
@@ -159,22 +175,26 @@ export default {
   -webkit-box-orient: vertical;
   overflow-y: hidden;
   text-overflow: ellipsis;
+  text-align: left;
 }
 
 @media all and (max-width: 1200px) {
+  .boards-container {
+    -ms-grid-column: 2;
+    -ms-grid-column-span: 8;
+    grid-column: 4 / span 8;
+    grid-template-columns: repeat(8, minmax(auto, 95px));
+    grid-gap: 6px;
+  }
   .board {
-    -ms-grid-column-span: 6;
-    grid-column-end: span 6;
+    -ms-grid-column-span: 4;
+    grid-column-end: span 4;
   }
 }
 @media all and (max-width: 850px) {
   .board {
     -ms-grid-column-span: 12;
     grid-column-end: span 12;
-  }
-  .article {
-    height: 63px;
-    padding: .25rem 1.25rem;;
   }
   .tech-title {
     font-size: 22px;

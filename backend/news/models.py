@@ -20,6 +20,7 @@ class SiteBoard(models.Model):
     site_name = models.CharField('Name of the site', max_length=100)
     description = models.TextField('Description', max_length=200, blank=True)
     url = models.URLField('Link', unique=True)
+    image_url = models.URLField('Image link', blank=True, max_length=350)
     category = models.ForeignKey(
         Category, verbose_name='Category', on_delete=models.SET_NULL, null=True
     )
@@ -38,6 +39,7 @@ class Article(models.Model):
     title = models.CharField('Title', max_length=200)
     description = models.TextField('Description', max_length=350)
     url = models.URLField('Link', unique=True)
+    image_url = models.URLField('Image link', blank=True, max_length=350)
     created_at = models.DateTimeField('Created date', auto_now_add=True)
     site_board = models.ForeignKey(SiteBoard, verbose_name='Site board',
                                    on_delete=models.CASCADE)

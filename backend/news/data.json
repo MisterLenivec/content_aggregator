@@ -2,14 +2,18 @@
     "techcrunch": {
         "site_name": "TechCrunch",
         "site_board_url": "https://techcrunch.com/",
+        "parse_this_page": true,
         "card_class": "post-block--unread",
         "title_tag": "a",
         "title_class": "post-block__title__link",
         "descr_tag": "div",
         "descr_class": "post-block__content",
         "url_tag": "a",
-        "url_class": "post-block__title__link"
-    },
+        "url_class": "post-block__title__link",
+        "img_url_tag": "img",
+        "img_url_class": "",
+        "img_url_type": "src"
+        },
     "cnbc_tech": {
         "site_name": "CNBC Tech",
         "site_board_url": "https://www.cnbc.com/technology/",
@@ -19,18 +23,24 @@
         "descr_tag": "",
         "descr_class": "",
         "url_tag": "a",
-        "url_class": "Card-title"
+        "url_class": "Card-title",
+        "img_url_tag": "",
+        "img_url_class": "",
+        "img_url_type": ""
     },
     "verge": {
         "site_name": "The Verge",
         "site_board_url": "https://www.theverge.com/tech/",
-        "card_class": "c-entry-box--compact__body",
+        "card_class": "c-entry-box--compact",
         "title_tag": "h2",
         "title_class": "c-entry-box--compact__title",
         "descr_tag": "",
         "descr_class": "",
         "url_tag": "a",
-        "url_class": ""
+        "url_class": "",
+        "img_url_tag": "img",
+        "img_url_class": "",
+        "img_url_type": "src"
     },
     "ars_technica": {
         "site_name": "Ars Technica",
@@ -41,18 +51,24 @@
         "descr_tag": "p",
         "descr_class": "excerpt",
         "url_tag": "a",
-        "url_class": ""
+        "url_class": "",
+        "img_url_tag": "div",
+        "img_url_class": "listing",
+        "img_url_type": "style"
     },
     "the_nex_web": {
         "site_name": "The Next Web",
         "site_board_url": "https://thenextweb.com/latest/",
-        "card_class": "story-text",
+        "card_class": "story--large",
         "title_tag": "a",
         "title_class": "",
         "descr_tag": "p",
         "descr_class": "story-chunk",
         "url_tag": "a",
-        "url_class": ""
+        "url_class": "",
+        "img_url_tag": "",
+        "img_url_class": "",
+        "img_url_type": ""
     },
     "buzzfeed_tech": {
         "site_name": "Buzzfeed Tech",
@@ -63,7 +79,10 @@
         "descr_tag": "p",
         "descr_class": "newsblock-story-card__description",
         "url_tag": "a",
-        "url_class": "newsblock-story-card__link"
+        "url_class": "newsblock-story-card__link",
+        "img_url_tag": "img",
+        "img_url_class": "newsblock-story-card__image",
+        "img_url_type": "src"
     },
     "wsj_tech": {
         "site_name": "WSJ Tech",
@@ -74,6 +93,9 @@
         "descr_tag": "",
         "descr_class": "",
         "url_tag": "a",
-        "url_class": ""
+        "url_class": "",
+        "img_url_tag": "",
+        "img_url_class": "",
+        "img_url_type": ""
     }
 }
