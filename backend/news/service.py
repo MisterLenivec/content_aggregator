@@ -30,49 +30,52 @@ def send_message_about_problems(ex, site_name='Wired'):
 
 def get_articles(site):
     """Universal parser for multiple sites"""
-    failures_data = set()
-    failures_sites = set()
-    site_board_name = SiteBoard.objects.get(site_name=site['site_name'])
-    Article.objects.filter(site_board=site_board_name).delete()
-    response = requests.get(site['site_board_url'], headers=headers)
-    soup = BeautifulSoup(response.text, features='html.parser')
-    for post in soup.find_all(class_=site['card_class'])[:10]:
-        image_url = ''
-        if site['img_url_type'] == 'src':
-            image_url = post.find(site['img_url_tag'], class_=site['img_url_class']).get(site['img_url_type']),
-        elif site['img_url_type'] == 'style':
-            image_url = post.find(site['img_url_tag'], class_=site['img_url_class']).get(site['img_url_type'])[22:-3],
-        try:
-            article = Article(
-                title=post.find(site['title_tag'], class_=site['title_class']).get_text().strip(),
-                description=post.find(site['descr_tag'], class_=site['descr_class']).get_text().strip() if site['descr_tag'] else 'Read more in this article',
-                url=post.find(site['url_tag'], class_=site['url_class']).get('href'),
-                image_url=image_url[0] if image_url else '',
-                site_board=site_board_name
-            )
-            article.save()
-        except AttributeError:
-            failures_sites.add(site['site_name'])
-            failures_data.add(traceback.format_exc())
-    if failures_data:
-        send_message_about_problems(''.join(failures_data), ''.join(failures_sites))
+    site_board_name = SiteBoard.objects.filter(site_name=site['site_name']).first()
+    if site_board_name:
+        failures_data = set()
+        failures_sites = set()
+        Article.objects.filter(site_board=site_board_name).delete()
+        response = requests.get(site['site_board_url'], headers=headers)
+        soup = BeautifulSoup(response.text, features='html.parser')
+        for post in soup.find_all(class_=site['card_class'])[:10]:
+            image_url = ''
+            if site['img_url_type'] == 'src':
+                image_url = post.find(site['img_url_tag'], class_=site['img_url_class']).get(site['img_url_type']),
+            elif site['img_url_type'] == 'style':
+                image_url = post.find(site['img_url_tag'], class_=site['img_url_class']).get(site['img_url_type'])[22:-3],
+            try:
+                article = Article(
+                    title=post.find(site['title_tag'], class_=site['title_class']).get_text().strip(),
+                    description=post.find(site['descr_tag'], class_=site['descr_class']).get_text().strip() if site['descr_tag'] else 'Read more in this article',
+                    url=post.find(site['url_tag'], class_=site['url_class']).get('href'),
+                    image_url=image_url[0] if image_url else '',
+                    site_board=site_board_name
+                )
+                article.save()
+            except AttributeError:
+                failures_sites.add(site['site_name'])
+                failures_data.add(traceback.format_exc())
+        if failures_data:
+            send_message_about_problems(''.join(failures_data),
+                                        ''.join(failures_sites))
 
 
 # You're the chosen one, ha?
 def get_wired_articles():
     """Parser for Wired"""
-    site_board_name = SiteBoard.objects.get(site_name='Wired')
-    Article.objects.filter(site_board=site_board_name).delete()
-    response = requests.get('https://www.wired.com/', headers=headers)
-    soup = BeautifulSoup(response.text, features='html.parser')
-    for post in soup.find_all(class_='card-component__description')[:10]:
-        article = Article(
-            title=post.find('h2').get_text().strip(),
-            description=post.find('span').get_text().strip(),
-            url=post.find('a').get('href') if 'http' in post.find('a').get('href') else 'https://www.wired.com' + post.find('a').get('href'),
-            site_board=site_board_name
-        )
-        article.save()
+    site_board_name = SiteBoard.objects.filter(site_name='Wired').first()
+    if site_board_name:
+        Article.objects.filter(site_board=site_board_name).delete()
+        response = requests.get('https://www.wired.com/', headers=headers)
+        soup = BeautifulSoup(response.text, features='html.parser')
+        for post in soup.find_all(class_='card-component__description')[:10]:
+            article = Article(
+                title=post.find('h2').get_text().strip(),
+                description=post.find('span').get_text().strip(),
+                url=post.find('a').get('href') if 'http' in post.find('a').get('href') else 'https://www.wired.com' + post.find('a').get('href'),
+                site_board=site_board_name
+            )
+            article.save()
 
 
 def start_parsing():
@@ -91,7 +94,8 @@ def start_parsing():
                     get_articles(search_data[site])
                 except AttributeError:
                     print(traceback.format_exc())
-                    send_message_about_problems(AttributeError, search_data[site]["site_name"])
+                    send_message_about_problems(
+                        AttributeError, search_data[site]["site_name"])
     except FileNotFoundError:
         print(traceback.format_exc())
         send_message_about_problems(FileNotFoundError, 'reading data')

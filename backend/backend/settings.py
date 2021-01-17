@@ -26,7 +26,7 @@ SECRET_KEY = os.environ.get('aggregator_secret_key')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('aggregator_debug') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 # Application definition
@@ -135,9 +135,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8080",
+    "http://localhost:8081",
     "http://127.0.0.1:8080",
+    "http://127.0.0.1:8000",
     "http://192.168.1.67:8080",
-
 ]
 
 EMAIL_BACKEND = os.environ.get('my_email_backend')
@@ -149,7 +150,8 @@ EMAIL_USE_TLS = os.environ.get('my_email_use_tls') == 'True'
 EMAIL_USE_SSL = os.environ.get('my_email_use_ssl') == 'True'
 DEFAULT_FROM_EMAIL = os.environ.get('my_email_host_user')
 
-REDIS_HOST = '0.0.0.0'
+# REDIS_HOST for local machine is '0.0.0.0', for docker 'redis'
+REDIS_HOST = 'redis'
 REDIS_PORT = '6379'
 CELERY_BROKER_URL = 'redis://' + REDIS_HOST + ':' + REDIS_PORT + '/0'
 CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}

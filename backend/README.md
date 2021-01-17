@@ -28,3 +28,8 @@ flower -A backend --port=5555
 ```
 
 #### View Flower http://127.0.0.1:5555/
+
+#### Or create docker build
+
+#### Don't forget about settings
+

@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  ca_db:
+    image: postgres:12.5
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+      - /etc/localtime:/etc/localtime:ro
+    env_file:
+      - .env
+    environment:
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_HOST: ca_db
+  redis:
+    restart: always
+    image: redis:latest
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+  django:
+    container_name: aggregator_backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command:  sh -c "wait-for-it.sh ca_db:5432 &&
+              python /usr/src/backend/manage.py migrate --noinput &&
+              python /usr/src/backend/manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./backend:/usr/src/backend
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - ca_db
+      - redis
+  vue:
+    container_name: aggregator_frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - './frontend:/frontend'
+      - '/frontend/node_modules'
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "8081:8080"
+  celery_worker:
+    container_name: celery_worker
+    build:
+      context: ./backend
+    restart: always
+    command:  sh -c "wait-for-it.sh aggregator_backend:8000 && 
+              wait-for-it.sh redis:6379 && celery -A backend worker -l info"
+    volumes:
+      - ./backend:/usr/src/backend
+      - /etc/localtime:/etc/localtime:ro
+    env_file:
+      - .env
+    depends_on:
+      - django
+      - ca_db
+      - redis
+  celery_beat:
+    container_name: celery_beat
+    restart: on-failure
+    build:
+      context: ./backend
+    command:  sh -c "wait-for-it.sh aggregator_backend:8000 && 
+              wait-for-it.sh redis:6379 && celery -A backend beat -l info"
+    volumes:
+      - ./backend:/usr/src/backend
+      - /etc/localtime:/etc/localtime:ro
+    env_file:
+      - .env
+    depends_on:
+      - django
+      - ca_db
+      - redis
+  flower:
+    image: mher/flower
+    command: ["flower", "--broker=redis://redis:6379/0", "--port=5555"]  
+    ports:  
+      - 5555:5555 
+    depends_on:
+      - redis
+
+volumes:
+  postgres_data:
+

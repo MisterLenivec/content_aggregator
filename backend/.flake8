@@ -1,0 +1,2 @@
+[flake8]
+exclude = .git,__pycache__, manage.py, migrations, content_aggregator_env, settings.py
