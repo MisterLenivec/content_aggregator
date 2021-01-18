@@ -15,8 +15,7 @@
               </p>
             </div>
             <ul class="list-group list-group-flush">
-              <li v-for="article in listArticles"
-                  v-if="article.site_board === board.site_name"
+              <li v-for="article in board.articles"
                   :key="article.id" class="list-group-item bg-transparent article">
                 <a class="article-url" :href="article.url" target="_blank"
                    :title="article.title + '\n\n' + article.description">
@@ -48,25 +47,17 @@ export default {
   name: "Home",
   data() {
     return {
-      listArticles: [],
       listBoards: [],
     }
   },
   components: {},
   created() {
-    this.loadListArticles()
     this.loadListBoards()
   },
   methods: {
-    async loadListArticles() {
-      this.listArticles = await fetch(
-          `${this.$store.getters.getServerUrl}/article`
-      ).then(response => response.json())
-      console.log(this.listArticles)
-    },
     async loadListBoards() {
       this.listBoards = await fetch(
-          `${this.$store.getters.getServerUrl}/board`
+          `${this.$store.getters.getServerUrl}/boards`
       ).then(response => response.json())
       console.log(this.listBoards)
     }

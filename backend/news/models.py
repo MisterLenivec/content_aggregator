@@ -22,7 +22,8 @@ class SiteBoard(models.Model):
     url = models.URLField('Link', unique=True)
     image_url = models.URLField('Image link', blank=True, max_length=350)
     category = models.ForeignKey(
-        Category, verbose_name='Category', on_delete=models.SET_NULL, null=True
+        Category, verbose_name='Category', related_name='boards',
+        on_delete=models.SET_NULL, null=True
     )
 
     def __str__(self):
@@ -41,8 +42,10 @@ class Article(models.Model):
     url = models.URLField('Link', unique=True)
     image_url = models.URLField('Image link', blank=True, max_length=350)
     created_at = models.DateTimeField('Created date', auto_now_add=True)
-    site_board = models.ForeignKey(SiteBoard, verbose_name='Site board',
-                                   on_delete=models.CASCADE)
+    site_board = models.ForeignKey(
+        SiteBoard, verbose_name='Site board',
+        related_name='articles', on_delete=models.CASCADE
+    )
 
     def __str__(self):
         return self.title

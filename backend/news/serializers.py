@@ -1,4 +1,4 @@
-from rest_framework.serializers import ModelSerializer, SlugRelatedField
+from rest_framework.serializers import ModelSerializer, SlugRelatedField, HyperlinkedRelatedField
 
 from .models import SiteBoard, Article, Category
 
@@ -15,6 +15,9 @@ class ArticleSerializer(ModelSerializer):
 class SiteBoardSerializer(ModelSerializer):
     """Website board serializer"""
     category = SlugRelatedField(slug_field='name', read_only=True)
+    articles = ArticleSerializer(many=True, read_only=True)
+    # articles = HyperlinkedRelatedField(many=True, read_only=True,
+    #                                    view_name='article-detail')
 
     class Meta:
         model = SiteBoard
@@ -23,6 +26,9 @@ class SiteBoardSerializer(ModelSerializer):
 
 class CategorySerializer(ModelSerializer):
     """Category serializer"""
+    # boards = SiteBoardSerializer(many=True, read_only=True)
+    boards = HyperlinkedRelatedField(many=True, read_only=True,
+                                       view_name='siteboard-detail')
 
     class Meta:
         model = Category
